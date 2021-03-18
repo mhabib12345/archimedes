@@ -1,0 +1,95 @@
+Config { 
+
+   -- appearance
+     font =         "xft:Font Awesome 5 Free Solid:size=9, Font Awesome 5 Brands:size=9, Jetbrains Mono:size=9:bold:antialias=true,Noto Sans CJK JP :style=Thin:size=9"
+   , bgColor     =   "#202020"
+   , fgColor     =   "lightblue"
+   --, position    =   Top
+   , position = Static { xpos = 4 , ypos = 3, width = 1345, height = 20 }
+   --, alpha       =   20
+   , border      =   FullB 3
+   , borderColor =  "#009aab"
+
+   -- layout
+   , sepChar =  "%"   -- delineator between plugin names and straight text
+   , alignSep = "}{"  -- separator between left-right alignment
+   , template = " %StdinReader% }{<fc=black,darkorange>%dynnetwork%</fc>|%battery%|%memory%[%swap%]|<fc=#00cc00>%date%</fc>"
+   -- general behavior
+   , lowerOnStart =     True    -- send to bottom of window stack on start
+   , hideOnStart =      False   -- start with window unmapped (hidden)
+   , allDesktops =      True    -- show on all desktops
+   , overrideRedirect = True    -- set the Override Redirect flag (Xlib)
+   , pickBroadest =     False   -- choose widest display (multi-monitor)
+   , persistent =       True    -- enable/disable hiding (True = disabled)
+   , commands = 
+
+        -- weather monitor
+        [ Run StdinReader 
+
+        -- network activity monitor (dynamic interface resolution)
+        , Run DynNetwork     [ "--template" , "<tx>kB/s<rx>kB/s"
+                             --, "--Low"      , "512"       -- units: B/s
+                             --, "--High"     , "1536"       -- units: B/s
+                             --, "--low"      , "green"
+                             --, "--normal"   , "orange"
+                             --, "--high"     , "red"
+                             ] 10
+
+        -- cpu activity monitor
+        , Run MultiCpu       [ "--template" , "Cpu: <total0>%|<total1>%"
+                             , "--Low"      , "50"         -- units: %
+                             , "--High"     , "85"         -- units: %
+                             , "--low"      , "green"
+                             , "--normal"   , "orange"
+                             , "--high"     , "red"
+                             ] 10
+
+        -- cpu core temperature monitor
+        , Run CoreTemp       [ "--template" , ":<core0>°C|<core1>°C"
+                             , "--Low"      , "50"        -- units: °C
+                             , "--High"     , "80"        -- units: °C
+                             , "--low"      , "green"
+                             , "--normal"   , "orange"
+                             , "--high"     , "red"
+                             ] 50
+                          
+        -- memory usage monitor
+        , Run Memory         [ "--template" ,":<usedratio>%"
+                             , "--Low"      , "20"        -- units: %
+                             , "--High"     , "85"        -- units: %
+                             , "--low"      , "green"
+                             , "--normal"   , "orange"
+                             , "--high"     , "red"
+                             ] 10
+        , Run Swap           [ "--template" ,"Swap:<used>MB"
+                             , "--Low"      , "1024"        -- units: MB
+                             , "--High"     , "3072"        -- units: MB
+                             , "--low"      , "green"
+                             , "--normal"   , "orange"
+                             , "--high"     , "red"
+                             ] 10 
+        -- battery monitor
+        , Run Battery        [ "--template" , ": <acstatus>"
+                             , "--Low"      , "10"        -- units: %
+                             , "--High"     , "80"        -- units: %
+                             , "--low"      , "red"
+                             , "--normal"   , "orange"
+                             , "--high"     , "green"
+
+                             , "--" -- battery specific options
+                                       -- discharging status
+                                       , "-o"	, "<left>% (<timeleft>)"
+                                       -- AC "on" status
+                                       , "-O"	, ""
+                                       -- charged status
+                                       , "-i"	, "Full"
+                             ] 50
+
+         -- time and date indicator
+         , Run Date "%a %d %b %Y %H:%M         " "date" 10
+         --   (%F = y-m-d date, %a = day of week, %T = h:m:s time)
+         -- , Run Date           "<fc=#ABABAB>%F (%a) %T</fc>" "date" 10
+        
+        ]
+   }
+
